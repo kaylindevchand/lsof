@@ -299,7 +299,7 @@ void usage(struct lsof_context *ctx, /* context */
         (void)fprintf(stderr, " latest FAQ: %s\n", LSOF_FAQ_URL);
         (void)fprintf(stderr, " latest (non-formatted) man page: %s\n",
                       LSOF_MAN_URL);
-        (void)fprintf(stderr, " usage: [-?ab%shH%slnNoOP%s%stUvV%s]",
+        (void)fprintf(stderr, " usage: [-?abB%shH%slnNoOP%s%stUvV%s]",
 
 #if defined(HASNCACHE)
                       "C",
@@ -459,6 +459,7 @@ void usage(struct lsof_context *ctx, /* context */
         col = print_in_col(1, "-?|-h list help");
         col = print_in_col(col, "-a AND selections (OR)");
         col = print_in_col(col, "-b avoid kernel blocks");
+        col = print_in_col(col, "-B limit buffering of process list");
         col = print_in_col(col, "-c c  cmd c ^c /c/[bix]");
         (void)snpf(buf, sizeof(buf), "+c w  COMMAND width (%d)", CMDL);
         col = print_in_col(col, buf);

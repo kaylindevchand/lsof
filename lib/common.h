@@ -339,6 +339,7 @@ extern int optind;
 #    endif     /* !defined(LOGINML) */
 
 #    define LPROCINCR 128 /* Lproc[] allocation increment */
+#    define LPROCFLUSH 1 /* Flush lproc when it reaches this size */ 
 #    define LSOF_GITHUB_URL "https://github.com/lsof-org"
 #    define LSOF_REPO "lsof"
 #    define LSOF_BRANCH "master"
@@ -514,8 +515,10 @@ extern int PpidColW;
 extern int SzOffColW;
 #    define TASKCMDTTL "TASKCMD"
 extern int TaskCmdColW;
+#    define TASKCMDDEFAULTLEN 10	/* Default width when Fnobuffering is selected */
 #    define TASKTIDTTL "TID"
 extern int TaskTidColW;
+#    define TASKTIDDEFAULTLEN 7	/* Default width when Fnobuffering is selected */
 #    define TYPETTL "TYPE"
 extern int TypeColW;
 #    define USERTTL "USER"
@@ -1398,6 +1401,8 @@ struct lsof_context {
 #    define Fand (ctx->logic_and)
 /* -x option */
 #    define Fxopt (ctx->x_opt)
+/* limit buffering */
+#    define Fnobuffering (ctx->limit_buffering)
 /* avoid blocking */
 #    define Fblock (ctx->avoid_blocking)
 /* avoid forking overhead */

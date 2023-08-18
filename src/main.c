@@ -62,7 +62,6 @@ int main(int argc, char *argv[]) {
     char *fmtr = (char *)NULL;
     long l;
     MALLOC_S len;
-    struct lfile *lf;
     struct nwad *np, *npn;
     char options[128];
     int rc = 0;
@@ -151,7 +150,7 @@ int main(int argc, char *argv[]) {
      * Create option mask.
      */
     (void)snpf(options, sizeof(options),
-               "?a%sbc:%sD:d:%s%sf:F:g:hHi:%s%slL:%s%snNo:Op:QPr:%ss:S:tT:u:"
+               "?a%sBbc:%sD:d:%s%sf:F:g:hHi:%s%slL:%s%snNo:Op:QPr:%ss:S:tT:u:"
                "UvVwx:%s%s%s",
 
 #if defined(HAS_AFS) && defined(HASAOPT)
@@ -260,6 +259,9 @@ int main(int argc, char *argv[]) {
 
         case 'b':
             lsof_avoid_blocking(ctx, 1);
+            break;
+        case 'B':
+            Fnobuffering = 1;
             break;
         case 'c':
             if (GOp == '+') {
@@ -1312,162 +1314,9 @@ int main(int argc, char *argv[]) {
             (void)qsort((QSORT_P *)slp, (size_t)Nlproc,
                         (size_t)sizeof(struct lproc *), comppid);
         }
-        if ((n = Nlproc)) {
 
-#if defined(HASNCACHE)
-            /*
-             * If using the kernel name cache, force its reloading.
-             */
-            NcacheReload = 1;
-#endif /* defined(HASNCACHE) */
+        n = endpoints_and_print((Nlproc > 1) ? slp : &Lproc);
 
-#if defined(HASEPTOPTS)
-            /*
-             * If endpoint info has been requested, make sure it is coded for
-             * printing.
-             *
-             * Lf contents must be preserved, since they may point to a
-             * malloc()'d area, and since Lf is used throughout the printing
-             * of the selected processes.
-             */
-            if (FeptE) {
-                lf = Lf;
-                /*
-                 * Scan all selected processes.
-                 */
-                for (i = 0; i < Nlproc; i++) {
-                    Lp = (Nlproc > 1) ? slp[i] : &Lproc[i];
-
-                    /*
-                     * For processes that have been selected for printing
-                     * and have files that are the end point(s) of pipe(s),
-                     * process the file endpoints.
-                     */
-                    if (Lp->pss && (Lp->ept & EPT_PIPE))
-                        (void)process_pinfo(ctx, 0);
-                    /*
-                     * Process POSIX MQ endpoints.
-                     */
-                    if (Lp->ept & EPT_PSXMQ)
-                        (void)process_psxmqinfo(ctx, 0);
-
-#    if defined(HASUXSOCKEPT)
-                    /*
-                     * For processes that have been selected for printing
-                     * and have files that are the end point(s) of UNIX
-                     * socket(s), process the file endpoints.
-                     */
-                    if (Lp->pss && (Lp->ept & EPT_UXS))
-                        (void)process_uxsinfo(ctx, 0);
-#    endif /* defined(HASUXSOCKEPT) */
-
-#    if defined(HASPTYEPT)
-                    /*
-                     * For processes that have been selected for printing
-                     * and have files that are the end point(s) of pseudo-
-                     * terminal files(s), process the file endpoints.
-                     */
-                    if (Lp->pss && (Lp->ept & EPT_PTY))
-                        (void)process_ptyinfo(ctx, 0);
-#    endif /* defined(HASPTYEPT) */
-
-                    /*
-                     * Process INET socket endpoints.
-                     */
-                    if (Lp->ept & EPT_NETS)
-                        (void)process_netsinfo(ctx, 0);
-
-#    if defined(HASIPv6)
-                    /*
-                     * Process INET6 socket endpoints.
-                     */
-                    if (Lp->ept & EPT_NETS6)
-                        (void)process_nets6info(ctx, 0);
-#    endif /* defined(HASIPv6) */
-                    /*
-                     * Process eventfd endpoints.
-                     */
-                    if (Lp->ept & EPT_EVTFD)
-                        (void)process_evtfdinfo(ctx, 0);
-                }
-                /*
-                 * In a second pass, look for unselected endpoint files,
-                 * possibly selecting them for printing.
-                 */
-                for (i = 0; i < Nlproc; i++) {
-                    Lp = (Nlproc > 1) ? slp[i] : &Lproc[i];
-
-                    /*
-                     * Process pipe endpoints.
-                     */
-                    if (Lp->ept & EPT_PIPE_END)
-                        (void)process_pinfo(ctx, 1);
-                    /*
-                     * Process POSIX MQ endpoints.
-                     */
-                    if (Lp->ept & EPT_PSXMQ_END)
-                        (void)process_psxmqinfo(ctx, 1);
-
-#    if defined(HASUXSOCKEPT)
-                    /*
-                     * Process UNIX socket endpoints.
-                     */
-                    if (Lp->ept & EPT_UXS_END)
-                        (void)process_uxsinfo(ctx, 1);
-#    endif /* defined(HASUXSOCKEPT) */
-
-#    if defined(HASPTYEPT)
-                    /*
-                     * Process pseudo-terminal endpoints.
-                     */
-                    if (Lp->ept & EPT_PTY_END)
-                        (void)process_ptyinfo(ctx, 1);
-#    endif /* defined(HASPTYEPT) */
-
-                    /*
-                     * Process INET socket endpoints.
-                     */
-                    if (Lp->ept & EPT_NETS_END)
-                        (void)process_netsinfo(ctx, 1);
-
-#    if defined(HASIPv6)
-                    /*
-                     * Process INET6 socket endpoints.
-                     */
-                    if (Lp->ept & EPT_NETS6_END)
-                        (void)process_nets6info(ctx, 1);
-#    endif /* defined(HASIPv6) */
-
-                    /*
-                     * Process envetfd endpoints.
-                     */
-                    if (Lp->ept & EPT_EVTFD_END)
-                        (void)process_evtfdinfo(ctx, 1);
-                }
-                Lf = lf;
-            }
-#endif /* defined(HASEPTOPTS) */
-
-            /*
-             * Print the selected processes and count them.
-             *
-             * Lf contents must be preserved, since they may point to a
-             * malloc()'d area, and since Lf is used throughout the print
-             * process.
-             */
-            for (lf = Lf, print_init(ctx); PrPass < 2; PrPass++) {
-                for (i = n = 0; i < Nlproc; i++) {
-                    Lp = (Nlproc > 1) ? slp[i] : &Lproc[i];
-                    if (Lp->pss) {
-                        if (print_proc(ctx))
-                            n++;
-                    }
-                    if (RptTm && PrPass)
-                        (void)free_lproc(Lp);
-                }
-            }
-            Lf = lf;
-        }
         /*
          * If a repeat time is set, sleep for the specified time.
          *

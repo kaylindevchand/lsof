@@ -247,6 +247,10 @@ void alloc_lproc(struct lsof_context *ctx, int pid, /* Process ID */
             Error(ctx);
         }
         sz = LPROCINCR;
+    } else if (Fnobuffering && (Nlproc + 1) > LPROCFLUSH) {
+        /* Flush Lproc */
+	    endpoints_and_print(&Lproc);
+	    Nlproc = 0;
     } else if ((Nlproc + 1) > sz) {
         sz += LPROCINCR;
         if (!(Lproc = (struct lproc *)realloc(

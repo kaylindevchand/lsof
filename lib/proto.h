@@ -137,6 +137,7 @@ extern void process_nets6info(struct lsof_context *ctx, int f);
 #    endif     /* defined(HASEPTOPTS) */
 
 extern void free_lproc(struct lproc *lp);
+extern int endpoints_and_print(struct lproc **lp); 
 extern void gather_proc_info(struct lsof_context *ctx);
 extern char *gethostnm(struct lsof_context *ctx, unsigned char *ia, int af);
 

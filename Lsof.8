@@ -10,7 +10,7 @@ lsof \- list open files
 .SH SYNOPSIS
 .B lsof
 [
-.B \-?abChHlnNOPQRtUvVX
+.B \-?abBChHlnNOPQRtUvVX
 ] [
 .BI \-A " A"
 ] [
@@ -276,6 +276,9 @@ See the
 and
 .B "AVOIDING KERNEL BLOCKS"
 sections for information on using this option.
+.TP \w'names'u+4
+.B \-B
+directs lsof to limit the buffering of the process list
 .TP \w'names'u+4
 .BI \-c " c"
 selects the listing of files for processes executing the
